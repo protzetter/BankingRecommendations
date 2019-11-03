@@ -23,6 +23,7 @@ test  <- trainData[-sample, ]
 yTrain<-train$Product
 yTest<-test$Product
 
+#remove unwanted features
 train<-select(train,-Age.Group)
 test<-select(test,-Age.Group)
 train<-select(train,-Product)
@@ -36,9 +37,7 @@ yTraincat<-to_categorical(yTrainInt)
 yTestCat<-to_categorical(yTestInt)
 
 #convert input to matrix
-#fullTrainMatrix<-data.matrix(train)
 trainMatrix<-as.matrix(as.data.frame(lapply(train, as.numeric)))
-#fullTestMatrix<-data.matrix(test)
 testMatrix<-as.matrix(as.data.frame(lapply(test, as.numeric)))
 
 # Initialize a sequential model
@@ -76,20 +75,10 @@ table(as.array(k_argmax(yTestCat)), classes)
 # explain model with Lime
 library(lime)
 
-# Setup lime::model_type() function for keras
-model_type.keras.models.Sequential <- function(x, ...) {
-  return("classification")
-}
 
 model_type.keras.engine.sequential.Sequential <- function(x, ...) {
   "classification"}
 
-
-# Setup lime::predict_model() function for keras
-predict_model.keras.models.Sequential <- function(x, newdata, type, ...) {
-  pred <- predict_proba(object = x, x = as.matrix(newdata))
-  return(data.frame(pred))
-}
 
 predict_model.keras.engine.sequential.Sequential <- function(x, newdata, type, ...) {
   pred <- predict_proba(object = x, x = as.matrix(newdata))

@@ -6,8 +6,7 @@
 library(dplyr)
 library(e1071)
 library(C50)
-library(rpart)
-library(rpart.plot)
+library(partykit)
 
 #Read training and test files
 
@@ -52,4 +51,17 @@ sum(diag(trainTable))/sum(trainTable)
 predTest<-predict(model,test)
 testTable=table(yTest, predTest)
 sum(diag(testTable))/sum(testTable)
+myTree <- C50:::as.party.C5.0(model)
+plot(myTree[2])
+plot(myTree[33])
+modelRules<-C5.0(train,yTrain, trials = 1, rules=TRUE)
+plotpredTrain<-predict(modelRules,train)
+trainTable=table(yTrain, predTrain)
+sum(diag(trainTable))/sum(trainTable)
+
+
+#random forest
+require('randomForest')
+modelRF <- randomForest(Product ~ ., data=train, ntree=1)
+plot(modelRF$err.rate[, 1], type = "l", xlab = "nombre d'arbres", ylab = "erreur OOB")
 
