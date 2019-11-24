@@ -7,6 +7,9 @@ library(dplyr)
 library(e1071)
 library(C50)
 library(partykit)
+library(stats)
+library(factoextra)
+
 
 #Read training and test files
 
@@ -59,6 +62,46 @@ plotpredTrain<-predict(modelRules,train)
 trainTable=table(yTrain, predTrain)
 sum(diag(trainTable))/sum(trainTable)
 
+
+# experiment k-means
+fullTrainMatrix<-as.matrix(as.data.frame(lapply(train, as.numeric)))
+fullTestMatrix<-as.matrix(as.data.frame(lapply(test, as.numeric)))
+
+# Initialize total within sum of squares error: wss
+wss <- 0
+
+# For 1 to 15 cluster centers
+for (i in 1:15) {
+  km.out <- kmeans(fullTrainMatrix, centers = i, nstart=20)
+  # Save total within sum of squares to wss variable
+  wss[i] <- km.out$tot.withinss
+}
+
+# Plot total within sum of squares vs. number of clusters
+plot(1:15, wss, type = "b", 
+     xlab = "Number of Clusters", 
+     ylab = "Within groups sum of squares")
+
+
+# Set seed
+set.seed(1)
+par(mfrow = c(2, 3))
+for(i in 1:6) {
+  # Run kmeans() on x with three clusters and one start
+  km.out <- kmeans(fullTrainMatrix, centers=3, nstart=1)
+  
+  # Plot clusters
+  plot(fullTrainMatrix, col = km.out$cluster, 
+       main = km.out$tot.withinss, 
+       xlab = "", ylab = "")
+}
+cluster<-kmeans(fullTrainMatrix, centers=3, iter.max = 20)
+print(cluster)
+fviz_cluster(cluster, data = fullTrainMatrix,
+             #palette = c("#00AFBB","#2E9FDF", "#E7B800", "#FC4E07"),
+             ggtheme = theme_minimal(),
+             main = "Partitioning Clustering Plot"
+)
 
 #random forest
 require('randomForest')
